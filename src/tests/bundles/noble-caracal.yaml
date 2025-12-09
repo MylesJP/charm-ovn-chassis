@@ -20,19 +20,16 @@ applications:
       source: *openstack-origin
     channel: latest/edge
 
-  magpie:
-    # By default, when instance NUMA placement is not specified,
-    # a topology of N sockets, each with one core and one thread,
-    # is used for an instance, where N corresponds to the number of
-    # instance vCPUs requested.
-    #
-    # Let's use a 8 VCPU 2 socket flavor for low level tests
-    constraints: "instance-type=twosocketm1.xlarge"
-    charm: ch:magpie
+  ubuntu:
+    charm: ch:ubuntu
     num_units: 2
-    options:
-      source: *openstack-origin
     channel: latest/edge
+    constraints: "virt-type=virtual-machine mem=8G"
+
+  grafana-agent:
+    charm: ch:grafana-agent
+    channel: 1/stable
+    base: ubuntu@24.04
 
   ovn-chassis:
     charm: ../../../ovn-chassis_amd64.charm
@@ -42,7 +39,7 @@ relations:
   - - 'ovn-central:certificates'
     - 'vault:certificates'
 
-  - - 'magpie:juju-info'
+  - - 'ubuntu:juju-info'
     - 'ovn-chassis:juju-info'
 
   - - 'ovn-chassis:ovsdb'
@@ -50,3 +47,9 @@ relations:
 
   - - 'ovn-chassis:certificates'
     - 'vault:certificates'
+
+  - - 'grafana-agent:juju-info'
+    - 'ubuntu:juju-info'
+
+  - - 'grafana-agent:cos-agent'
+    - 'ovn-chassis:cos-agent'
